@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(flutter clean *)",
+      "Bash(flutter run *)",
+      "Read(//c/Users/ABHIJITH/AppData/Local/Pub/Cache/hosted/pub.dev/zego_zim-2.29.0/lib/**)",
+      "Read(//c/Users/ABHIJITH/AppData/Local/Pub/Cache/hosted/pub.dev/zego_express_engine-3.23.0/lib/**)"
+    ]
+  }
+}
