@@ -242,7 +242,12 @@ class _CallingPageState extends State<CallingPage> {
     for (final stream in event.streamList) {
       if (event.updateType == ZegoUpdateType.Add) {
         streamIDList.add(stream.streamID);
-        ZEGOSDKManager().expressService.startPlayingStream(stream.streamID);
+        // On web, express_service's onRoomStreamUpdate already calls startPlayingStream
+        // (unawaited) before firing this event. Calling it again concurrently causes the
+        // web SDK to restart the stream mid-setup, permanently breaking audio playback.
+        if (!kIsWeb) {
+          ZEGOSDKManager().expressService.startPlayingStream(stream.streamID);
+        }
       } else {
         streamIDList.remove(stream.streamID);
         ZEGOSDKManager().expressService.stopPlayingStream(stream.streamID);

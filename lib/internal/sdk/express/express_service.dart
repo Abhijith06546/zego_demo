@@ -81,11 +81,11 @@ class ExpressService {
       ZegoAudioConfig.preset(ZegoAudioConfigPreset.HighQuality),
     );
 
-    // Disable ZEGO's built-in noise suppression and auto-gain-control.
-    // These can make voices sound robotic/muffled. On web, the browser's
-    // WebRTC constraints handle this instead (echoCancellation still on).
-    ZegoExpressEngine.instance.enableANS(false);
-    ZegoExpressEngine.instance.enableAGC(false);
+    // ANS/AGC are not implemented on web (throws PlatformException like enableHardwareDecoder).
+    if (!kIsWeb) {
+      ZegoExpressEngine.instance.enableANS(false);
+      ZegoExpressEngine.instance.enableAGC(false);
+    }
   }
 
   Future<void> uninit() async {
@@ -231,14 +231,11 @@ class ExpressService {
       }
     }
     if (kIsWeb) {
-      // On web: don't pass ZegoPlayerConfig — resource modes are not applicable on web
-      // and can cause playback issues. Start without config, then mute video to prevent
-      // the browser wasting CPU trying to decode mobile video codecs (H.264 etc.),
-      // which degrades audio quality.
-      await ZegoExpressEngine.instance.startPlayingStream(streamID);
+      // Pass config (OnlyRTC) so ZEGO uses WebRTC and not CDN fallback (CDN is not set up).
+      // Then mute video to stop the browser wasting CPU on unsupported mobile codecs,
+      // and explicitly unmute audio since setAudioRouteToSpeaker ran before this stream existed.
+      await ZegoExpressEngine.instance.startPlayingStream(streamID, config: config);
       ZegoExpressEngine.instance.mutePlayStreamVideo(streamID, true);
-      // Explicitly unmute audio — setAudioRouteToSpeaker ran before this stream
-      // existed, so its muteAllPlayStreamAudio call had no effect on this stream.
       ZegoExpressEngine.instance.mutePlayStreamAudio(streamID, false);
     } else if (userInfo != null) {
       if (userInfo.viewID != -1) {
