@@ -23,5 +23,11 @@ Future<bool> requestPermission() async {
     debugPrint('[ERROR], request camera permission exception, $error');
   }
 
+  try {
+    await Permission.notification.request();
+  } on Exception catch (error) {
+    debugPrint('[ERROR], request notification permission exception, $error');
+  }
+
   return true;
 }

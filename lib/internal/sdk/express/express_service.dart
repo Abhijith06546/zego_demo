@@ -75,14 +75,14 @@ class ExpressService {
       'keep_audio_session_active': 'true',
     }));
 
-    // High-quality audio: 64kbps mono Opus (applies to publishing on all platforms).
-    // This ensures Android publishes at 64kbps so the web receives high-quality audio.
-    ZegoExpressEngine.instance.setAudioConfig(
-      ZegoAudioConfig.preset(ZegoAudioConfigPreset.HighQuality),
-    );
-
-    // ANS/AGC are not implemented on web (throws PlatformException like enableHardwareDecoder).
+    // Audio quality improvements — mobile only (web equivalents may throw PlatformException).
     if (!kIsWeb) {
+      // 64kbps mono Opus so Android publishes high-quality audio that the web receives clearly.
+      ZegoExpressEngine.instance.setAudioConfig(
+        ZegoAudioConfig.preset(ZegoAudioConfigPreset.HighQuality),
+      );
+      // Disable ZEGO's noise suppression and auto-gain-control — they make voices sound
+      // robotic when stacked on top of the browser's own WebRTC processing.
       ZegoExpressEngine.instance.enableANS(false);
       ZegoExpressEngine.instance.enableAGC(false);
     }

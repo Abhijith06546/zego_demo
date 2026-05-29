@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
+
 import 'zego_call_manager_extension.dart';
 import 'zego_call_manager_interface.dart';
 import 'zego_sdk_manager.dart';
@@ -18,6 +20,8 @@ class ZegoCallManager implements ZegoCallManagerInterface {
   ZegoCallData? currentCallData;
 
   bool isCallStart = false;
+  DateTime? callStartTime;
+  final lastCallDuration = ValueNotifier<Duration?>(null);
 
   bool get busy => currentCallData != null;
 
@@ -61,6 +65,7 @@ class ZegoCallManager implements ZegoCallManagerInterface {
 
   void clearCallData() {
     isCallStart = false;
+    callStartTime = null;
     currentCallData = null;
   }
 
@@ -121,7 +126,12 @@ class ZegoCallManager implements ZegoCallManagerInterface {
     final config = ZIMCallInviteConfig()
       ..mode = ZIMCallInvitationMode.advanced
       ..extendedData = extendedData
-      ..timeout = 60;
+      ..timeout = 60
+      ..pushConfig = (ZIMPushConfig()
+        ..resourcesID = 'zego_call'
+        ..title = type == ZegoCallType.voice ? 'Incoming Voice Call' : 'Incoming Video Call'
+        ..content = '${ZEGOSDKManager().currentUser?.userName ?? ''} is calling you'
+        ..payload = extendedData);
     final result = await ZEGOSDKManager()
         .zimService
         .sendUserRequest(userList, config: config);

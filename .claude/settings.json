@@ -4,7 +4,23 @@
       "Bash(flutter clean *)",
       "Bash(flutter run *)",
       "Read(//c/Users/ABHIJITH/AppData/Local/Pub/Cache/hosted/pub.dev/zego_zim-2.29.0/lib/**)",
-      "Read(//c/Users/ABHIJITH/AppData/Local/Pub/Cache/hosted/pub.dev/zego_express_engine-3.23.0/lib/**)"
+      "Read(//c/Users/ABHIJITH/AppData/Local/Pub/Cache/hosted/pub.dev/zego_express_engine-3.23.0/lib/**)",
+      "Bash(Get-ChildItem -Path \"d:\\\\zegocloud_sdk_demo_flutter-master\\\\best_practices\" -Force)",
+      "Bash(Select-Object Name, FullName, Mode)",
+      "PowerShell(ls -R \"d:\\\\zegocloud_sdk_demo_flutter-master\\\\best_practices\")",
+      "PowerShell(head -100)",
+      "PowerShell(Get-ChildItem -Path \"d:\\\\zegocloud_sdk_demo_flutter-master\\\\best_practices\\\\lib\" -Recurse -Force | Where-Object { $_.PSIsContainer -eq $true } | Sort-Object FullName)",
+      "PowerShell(Get-ChildItem -Path \"d:\\\\zegocloud_sdk_demo_flutter-master\\\\best_practices\\\\lib\\\\internal\\\\sdk\" -Recurse -Force | Where-Object { $_.PSIsContainer -eq $false } | ForEach-Object { $_.FullName } | Select-String \"\\\\.dart$\")",
+      "Bash(flutter create *)",
+      "Bash(Copy-Item -Recurse -Force \"D:\\\\zegocloud_sdk_demo_flutter-master\\\\best_practices\\\\lib\\\\*\" \"D:\\\\callfrndv2\\\\lib\\\\\" 2>&1 | Out-String; Copy-Item -Recurse -Force \"D:\\\\zegocloud_sdk_demo_flutter-master\\\\best_practices\\\\assets\" \"D:\\\\callfrndv2\\\\\")",
+      "Bash(Out-String)",
+      "Bash(Write-Host \"Done\")",
+      "Read(//d/callfrndv2/lib/**)",
+      "PowerShell(Get-ChildItem \"D:\\\\callfrndv2\\\\lib\\\\internal\\\\business\\\\\" -Recurse | ForEach-Object { $_.FullName })"
+    ],
+    "additionalDirectories": [
+      "D:\\zegocloud_sdk_demo_flutter-master\\best_practices\\lib",
+      "D:\\callfrndv2\\lib\\internal"
     ]
   }
 }

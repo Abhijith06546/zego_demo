@@ -69,13 +69,6 @@ class _CallEntryState extends State<CallEntry> {
   }
 
   Future<void> startCall(ZegoCallType callType) async {
-    if (XOverlayPageState.overlaying ==
-        audioRoomOverlayController.pageStateNotifier.value) {
-      /// overlay:audio room in overlaying, ignore
-      debugPrint('Audio Room Overlaying');
-      return;
-    }
-
     final userIDList = inviteeIDController.text.split(',')
       ..removeWhere((e) => e.isEmpty);
     if (userIDList.isEmpty) {
@@ -144,13 +137,6 @@ class _CallEntryState extends State<CallEntry> {
   }
 
   void pushToCallWaitingPage() {
-    if (XOverlayPageState.overlaying ==
-        audioRoomOverlayController.pageStateNotifier.value) {
-      /// overlay:audio room in overlaying, ignore
-      debugPrint('Audio Room Overlaying');
-      return;
-    }
-
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -163,13 +149,6 @@ class _CallEntryState extends State<CallEntry> {
   }
 
   void pushToCallingPage() {
-    if (XOverlayPageState.overlaying ==
-        audioRoomOverlayController.pageStateNotifier.value) {
-      /// overlay:audio room in overlaying, ignore
-      debugPrint('Audio Room Overlaying');
-      return;
-    }
-
     if (ZegoCallManager().currentCallData != null) {
       Navigator.push(
         context,

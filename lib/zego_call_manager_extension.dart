@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 
 import 'pages/call/call.dart';
@@ -181,11 +183,21 @@ extension ZegoCallManagerExtension on ZegoCallManager {
     if (currentCallData!.isGroupCall) {
       if (meHasAccepted && !isCallStart) {
         isCallStart = true;
+        callStartTime = DateTime.now();
         onCallStartStreamCtrl.add(null);
       }
     } else {
-      if (meHasAccepted && moreThanOneAcceptedExceptMe && !isCallStart) {
+      // moreThanOneAcceptedExceptMe only counts ZIM 'accepted' state.
+      // The inviter's ZIM state is always 'inviting' (never 'accepted'), so when the
+      // invitee accepts, moreThanOneAcceptedExceptMe stays false and the call never starts.
+      // Fix: also treat a waiting/inviting participant as an active call partner.
+      final otherIsActiveInCall = moreThanOneAcceptedExceptMe ||
+          currentCallData!.callUserList.any((u) =>
+              u.userID != (localUser?.userID ?? '') && u.isWaiting.value);
+      debugPrint('onReceiveCallUserAccepted: otherIsActiveInCall=$otherIsActiveInCall');
+      if (meHasAccepted && otherIsActiveInCall && !isCallStart) {
         isCallStart = true;
+        callStartTime = DateTime.now();
         onCallStartStreamCtrl.add(null);
       }
     }
@@ -255,8 +267,61 @@ extension ZegoCallManagerExtension on ZegoCallManager {
   }
 
   void stopCall() {
+    Duration? duration;
+    if (callStartTime != null) {
+      duration = DateTime.now().difference(callStartTime!);
+      debugPrint('duration kiti mowne : $duration');
+      lastCallDuration.value = duration;
+    }
+
+    if (duration != null && currentCallData != null) {
+      _saveCallRecord(duration, callStartTime!, currentCallData!, localUser?.userID);
+    }
+
     clearCallData();
     leaveRoom();
     onCallEndStreamCtrl.add(null);
+  }
+}
+
+Future<void> _saveCallRecord(
+  Duration duration,
+  DateTime startTime,
+  ZegoCallData callData,
+  String? localUserID,
+) async {
+  try {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    debugPrint('📞 saveCallRecord → uid=$uid localUserID=$localUserID duration=${duration.inSeconds}s');
+    if (uid == null) {
+      debugPrint('❌ saveCallRecord: uid is null, skipping');
+      return;
+    }
+
+    final callType = callData.callType == VIDEO_Call ? 'video' : 'voice';
+    final otherUsers = callData.callUserList
+        .where((u) => u.userID != localUserID)
+        .map((u) => u.userID)
+        .toList();
+
+    await FirebaseFirestore.instance
+        .collection('executives')
+        .doc(uid)
+        .update({
+      'callHistory': FieldValue.arrayUnion([
+        {
+          'callID': callData.callID,
+          'callType': callType,
+          'startTime': Timestamp.fromDate(startTime),
+          'endTime': Timestamp.fromDate(DateTime.now()),
+          'durationSeconds': duration.inSeconds,
+          'otherUsers': otherUsers,
+        }
+      ]),
+    });
+
+    debugPrint('✅ saveCallRecord: saved to Firestore');
+  } catch (e, st) {
+    debugPrint('❌ saveCallRecord failed: $e\n$st');
   }
 }

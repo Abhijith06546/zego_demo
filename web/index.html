@@ -23,15 +23,27 @@
   <!-- iOS meta tags & icons -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="pkbattles">
+  <meta name="apple-mobile-web-app-title" content="CallFrndExecutive">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="favicon.png"/>
 
-  <title>pkbattles</title>
+  <title>CallFrndExecutive</title>
   <link rel="manifest" href="manifest.json">
   <script src="assets/packages/zego_zim/assets/index.js" type="application/javascript"></script>
+  <!-- ZegoCloud ZPNs Web SDK: download from ZegoCloud and place at web/zego-zpns-web/index.js -->
+  <script src="zego-zpns-web/index.js" type="application/javascript"></script>
+
+  <script>
+    // Called from Dart after ZIM is initialized
+    function initZPNs(config) {
+      ZPNs.getInstance().register(config, ZIM.getInstance());
+    }
+    function unregisterZPNs() {
+      ZPNs.getInstance().unregister();
+    }
+  </script>
 
   <script>
     // The value below is injected by flutter build, do not touch.

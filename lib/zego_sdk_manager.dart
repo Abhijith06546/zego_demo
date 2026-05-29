@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 
 import 'internal/internal.dart';
+import 'utils/zpns_service.dart';
 
 export 'internal/internal.dart';
 
@@ -20,9 +21,11 @@ class ZEGOSDKManager {
   Future<void> connectUser(String userID, String userName, {String? token}) async {
     await expressService.connectUser(userID, userName, token: token);
     await zimService.connectUser(userID, userName, token: token);
+    ZPNsService.register();
   }
 
   Future<void> disconnectUser() async {
+    ZPNsService.unregister();
     await logoutRoom();
     await expressService.disconnectUser();
     await zimService.disconnectUser();

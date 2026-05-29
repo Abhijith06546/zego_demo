@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.zegocloud.demo" "\0"
-            VALUE "FileDescription", "pkbattles" "\0"
+            VALUE "CompanyName", "com.gobbog" "\0"
+            VALUE "FileDescription", "callfrnduser" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "pkbattles" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2023 com.zegocloud.demo. All rights reserved." "\0"
-            VALUE "OriginalFilename", "pkbattles.exe" "\0"
-            VALUE "ProductName", "pkbattles" "\0"
+            VALUE "InternalName", "callfrnduser" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2024 com.gobbog. All rights reserved." "\0"
+            VALUE "OriginalFilename", "callfrnduser.exe" "\0"
+            VALUE "ProductName", "CallFrndUser" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

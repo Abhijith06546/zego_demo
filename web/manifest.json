@@ -1,6 +1,6 @@
 {
-    "name": "pkbattles",
-    "short_name": "pkbattles",
+    "name": "CallFrndUser",
+    "short_name": "CallFrndUser",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

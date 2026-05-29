@@ -3,8 +3,9 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 
+import '../../app_globals.dart';
 import '../../components/components.dart';
-import '../../main.dart';
+import '../../services/call_notification_service.dart';
 import '../../zego_call_manager.dart';
 import 'calling_page.dart';
 import 'waiting_page.dart';
@@ -36,9 +37,11 @@ class ZegoCallController {
     ]);
   }
 
-  void onIncomingCallInvitationReceived(
+  Future<void> onIncomingCallInvitationReceived(
     IncomingCallInvitationReceivedEvent event,
-  ) {
+  ) async {
+    await CallNotificationService.endAll();
+
     final extendedData = jsonDecode(event.info.extendedData);
     if (extendedData is Map && extendedData.containsKey('type')) {
       final callType = extendedData['type'];
@@ -58,9 +61,38 @@ class ZegoCallController {
           );
           return;
         }
+
+        // When backgrounded, ZIM still delivers the call but the Flutter dialog
+        // is invisible. Show a native CallKit notification instead.
+        final appState = WidgetsBinding.instance.lifecycleState;
+        if (appState != AppLifecycleState.resumed) {
+          final callerID = event.info.inviter;
+          final callerName =
+              ZEGOSDKManager().getUser(callerID)?.userName ?? 'Incoming Call';
+          await CallNotificationService.showIncomingCall(
+            id: event.callID,
+            callerName: callerName,
+            isVideo: callType == VIDEO_Call,
+          );
+          return;
+        }
+
+        // If the user already tapped Accept on the lock-screen CallKit UI,
+        // auto-accept without showing the dialog again.
+        final pendingAccept = await CallNotificationService.hasPendingAccept();
+        await CallNotificationService.clearPendingAccept();
+        if (pendingAccept) {
+          acceptCall();
+          return;
+        }
+
+        // Guard: call may have ended during the awaits above.
+        if (navigatorKey.currentState == null) return;
+        if (ZegoCallManager().currentCallData == null) return;
+
         dialogIsShowing = true;
         showTopModalSheet(
-          context,
+          context, // ignore: use_build_context_synchronously
           GestureDetector(
             onTap: onIncomingCallDialogClicked,
             child: ZegoCallInvitationDialog(
@@ -93,14 +125,16 @@ class ZegoCallController {
 
   Future<void> acceptCall() async {
     hideIncomingCallDialog();
-    ZegoCallManager()
-        .acceptCallInvitation(ZegoCallManager().currentCallData!.callID);
+    final callID = ZegoCallManager().currentCallData?.callID;
+    if (callID == null) return;
+    ZegoCallManager().acceptCallInvitation(callID);
   }
 
   Future<void> rejectCall() async {
     hideIncomingCallDialog();
-    ZegoCallManager()
-        .rejectCallInvitation(ZegoCallManager().currentCallData!.callID);
+    final callID = ZegoCallManager().currentCallData?.callID;
+    if (callID == null) return;
+    ZegoCallManager().rejectCallInvitation(callID);
   }
 
   Future<T?> showTopModalSheet<T>(BuildContext context, Widget widget,
@@ -110,7 +144,7 @@ class ZegoCallController {
       barrierDismissible: barrierDismissible,
       transitionDuration: const Duration(milliseconds: 250),
       barrierLabel: MaterialLocalizations.of(context).dialogLabel,
-      barrierColor: Colors.black.withOpacity(0.5),
+      barrierColor: Colors.black.withValues(alpha: 0.5),
       pageBuilder: (context, _, __) => SafeArea(
           child: Column(
         children: [
